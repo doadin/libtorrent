@@ -171,10 +171,11 @@ TORRENT_TEST(alerts_types)
 	TEST_ALERT_TYPE(session_stats_header_alert, 92, 0, alert::stats_notification);
 	TEST_ALERT_TYPE(dht_sample_infohashes_alert, 93, 0, alert::dht_operation_notification);
 	TEST_ALERT_TYPE(block_uploaded_alert, 94, 0, PROGRESS_NOTIFICATION alert::upload_notification);
+	TEST_ALERT_TYPE(alerts_dropped_alert, 95, 3, alert::error_notification);
 
 #undef TEST_ALERT_TYPE
 
-	TEST_EQUAL(num_alert_types, 95);
+	TEST_EQUAL(num_alert_types, 96);
 	TEST_EQUAL(num_alert_types, count_alert_types);
 }
 
@@ -273,6 +274,17 @@ TORRENT_TEST(session_stats_alert)
 	auto const* v = alert_cast<session_stats_alert>(alerts[1]);
 	TEST_CHECK(v != nullptr);
 	TEST_CHECK(v->message().find("session stats (") != std::string::npos);
+}
+
+TORRENT_TEST(alert_name)
+{
+	TEST_EQUAL(alert_name(tracker_announce_alert::alert_type), "tracker_announce"_sv);
+	TEST_EQUAL(alert_name(torrent_resumed_alert::alert_type), "torrent_resumed"_sv);
+	TEST_EQUAL(alert_name(dht_announce_alert::alert_type), "dht_announce"_sv);
+	TEST_EQUAL(alert_name(block_uploaded_alert::alert_type), "block_uploaded"_sv);
+	TEST_EQUAL(alert_name(picker_log_alert::alert_type), "picker_log"_sv);
+	TEST_EQUAL(alert_name(dht_sample_infohashes_alert::alert_type), "dht_sample_infohashes"_sv);
+	TEST_EQUAL(alert_name(add_torrent_alert::alert_type), "add_torrent"_sv);
 }
 
 TORRENT_TEST(dht_sample_infohashes_alert)

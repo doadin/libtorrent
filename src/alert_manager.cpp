@@ -108,6 +108,11 @@ namespace libtorrent {
 
 		if (m_alerts[m_generation].empty()) return;
 
+		if (m_dropped.any()) {
+			emplace_alert<alerts_dropped_alert>(m_dropped);
+			m_dropped.reset();
+		}
+
 		m_alerts[m_generation].get_pointers(alerts);
 
 		// swap buffers

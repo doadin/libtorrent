@@ -941,6 +941,9 @@ namespace libtorrent {
 		// bitfield, so the bitfield starts recording dropped alerts from this
 		// point forward only.
 		//
+		// Every time alerts are popped, the dropped bitfield is also
+		// cleared and delivered via the ``alerts_dropped_alert``.
+		//
 		// The type of an alert is returned by the polymorphic function
 		// ``alert::type()`` but can also be queries from a concrete type via
 		// ``T::alert_type``, as a static constant.
