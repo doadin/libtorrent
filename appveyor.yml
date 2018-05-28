@@ -29,7 +29,7 @@ install:
 - if %compiler% == msvc-9.0 if defined crypto if not exist openssl-1.1.0f-vs2008.7z (
   echo downloading openssl-2008
   & appveyor DownloadFile "https://www.npcglib.org/~stathis/downloads/openssl-1.1.0f-vs2008.7z"
-)
+  )
 - if %compiler% == msvc-9.0 if defined crypto (
     echo extracting openssl-2008
     & 7z x -oc:\ -aoa openssl-1.1.0f-vs2008.7z > nul
