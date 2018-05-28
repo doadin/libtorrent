@@ -58,7 +58,7 @@ cache:
 
 build_script:
 # python binding
-- cd %ROOT_DIRECTORY%\bindings\python
+- cd %APPVEYOR_BUILD_FOLDER%\bindings\python
 - call "c:\program files (x86)\microsoft visual studio 9.0\vc\bin\vcvars32.bat"
 - if defined python (
   b2 libtorrent-link=static boost-link=static release toolset=msvc-9.0 optimization=space runtime-link=static link=static variant=release crypto=openssl include=C:\openssl\include openssl-version=1.1 linkflags=/LIBPATH:C:\openssl\lib -j2 --hash
