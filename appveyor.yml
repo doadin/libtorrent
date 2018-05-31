@@ -43,7 +43,7 @@ install:
 - set PYTHON_PATH=C:\Python27
 - set BOOST_ROOT=c:\Libraries\boost_1_63_0
 - set BOOST_BUILD_PATH=%BOOST_ROOT%\tools\build
-- set OPENSSL_PATH=c:\\openssl-1.1\\bin;%PATH%
+- set OPENSSL_PATH=c:\openssl-1.1\bin
 - echo %BOOST_ROOT%
 - echo %BOOST_BUILD_PATH%
 - set PATH=%BOOST_ROOT%;%VS_PATH%;%PYTHON_PATH%;%OPENSSL_PATH%;%BOOST_BUILD_PATH%\src\engine\bin.ntx86;%PATH%;
