@@ -1,9 +1,14 @@
 name: Python bindings
 
 on:
-   push:
-      branches: [ RC_1_2 RC_2_0 master ]
-   pull_request:
+   #push:
+   #   branches: [ RC_1_2 RC_2_0 master ]
+   #pull_request:
+    workflow_dispatch:
+      inputs:
+        ref:
+          description: "Enter a gvfsbuild tag or commit to release"
+          default: ""
 
 concurrency:
    group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}
@@ -21,37 +26,46 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-latest, windows-latest ]
+        os: [ windows-latest ] #ubuntu-20.04, macos-latest,
+        python: ["3.9","3.10","3.11","3.12"]
+        platform: [x64,x86]
 
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - name: dependencies (MacOS)
-      if: runner.os == 'macOS'
-      run: |
-        brew install boost-build boost boost-python3 python@3.12 openssl@1.1 python-setuptools
-        export PATH=$(brew --prefix)/opt/python@3.12/bin:$PATH
+    #- name: dependencies (MacOS)
+    #  if: runner.os == 'macOS'
+    #  run: |
+    #    brew install boost-build boost boost-python3 python@3.12 openssl@1.1 python-setuptools
+    #    export PATH=$(brew --prefix)/opt/python@3.12/bin:$PATH
 
-    - name: update package lists (linux)
-      if: runner.os == 'Linux'
-      continue-on-error: true
-      run: |
-        sudo apt update
+    #- name: update package lists (linux)
+    #  if: runner.os == 'Linux'
+    #  continue-on-error: true
+    #  run: |
+    #    sudo apt update
 
-    - uses: Chocobo1/setup-ccache-action@v1
-      if: runner.os != 'Windows'
+    #- uses: Chocobo1/setup-ccache-action@v1
+    #  if: runner.os != 'Windows'
+    #  with:
+    #    update_packager_index: false
+    #    override_cache_key: ccache-python-${{ matrix.os }}-${{ github.base_ref }}
+    #    ccache_options: |
+    #      max_size=500M
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        update_packager_index: false
-        override_cache_key: ccache-python-${{ matrix.os }}-${{ github.base_ref }}
-        ccache_options: |
-          max_size=500M
+        python-version: ${{ matrix.python }}
+        architecture: ${{ matrix.platform }}
+        cache: 'pip' # caching pip dependencies
 
-    - name: dependencies (linux)
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt install libboost-tools-dev libboost-python-dev libboost-dev libboost-system-dev python3 python3-setuptools libssl-dev
+    #- name: dependencies (linux)
+    #  if: runner.os == 'Linux'
+    #  run: |
+    #    sudo apt install libboost-tools-dev libboost-python-dev libboost-dev libboost-system-dev python3 python3-setuptools libssl-dev
 
     - name: install boost (windows)
       if: runner.os == 'Windows'
@@ -89,42 +103,37 @@ jobs:
         cd bindings\python
         python setup.py build_ext --b2-args "asserts=on invariant-checks=full" install --user --prefix=
 
-    - name: tests (windows)
+    - name: Current Date
       if: runner.os == 'Windows'
-      shell: cmd
-      run: |
-        cd bindings\python
-        python test.py
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-    - name: build no-deprecated (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        cd bindings/python
-        python3 setup.py build_ext --b2-args "deprecated-functions=off"
+    - name: Release latest
+      if: runner.os == 'Windows'
+      uses: softprops/action-gh-release@v2
+      with:
+        name: latest
+        tag_name: latest
+        body: gvsbuild-${{ steps.date.outputs.date }}
+        files: "bindings\\python\\*.pyd"
 
-    - name: build/install (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        cd bindings/python
-        python3 setup.py build_ext install --user --prefix=
+    #- name: build no-deprecated (Linux)
+    #  if: runner.os == 'Linux'
+    #  run: |
+    #    cd bindings/python
+    #    python3 setup.py build_ext --b2-args "deprecated-functions=off"
 
-    - name: build/install (MacOS)
-      if: runner.os == 'macOS'
-      run: |
-        # Install to Homebrew's python site-packages. no need for --user and --prefix
-        cd bindings/python
-        export PATH=$(brew --prefix)/opt/python@3.12/bin:$PATH
-        python3.12 setup.py build_ext install --install-lib $(brew --prefix)/lib/python3.12/site-packages
+    #- name: build/install (Linux)
+    #  if: runner.os == 'Linux'
+    #  run: |
+    #    cd bindings/python
+    #    python3 setup.py build_ext install --user --prefix=
 
-    - name: tests (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        cd bindings/python
-        python3 test.py
+    #- name: build/install (MacOS)
+    #  if: runner.os == 'macOS'
+    #  run: |
+    #    # Install to Homebrew's python site-packages. no need for --user and --prefix
+    #    cd bindings/python
+    #    export PATH=$(brew --prefix)/opt/python@3.12/bin:$PATH
+    #    python3.12 setup.py build_ext install --install-lib $(brew --prefix)/lib/python3.12/site-packages
 
-    - name: tests (MacOS)
-      if: runner.os == 'macOS'
-      run: |
-        cd bindings/python
-        export PATH=$(brew --prefix)/opt/python@3.12/bin:$PATH
-        python3.12 test.py
