@@ -9,7 +9,7 @@ clone_depth: 1
 environment:
   matrix:
     - variant: release
-      compiler: msvc-14.1
+      compiler: msvc-14.3
       model: 64
       python: 1
       python_dist: 1
@@ -33,7 +33,7 @@ install:
   - set BOOST_ROOT=C:\Libraries\boost_1_85_0
   - set BOOST_BUILD_PATH=%BOOST_ROOT%\tools\build
   - set PATH=%BOOST_ROOT%;%BOOST_BUILD_PATH%;%PYTHON_ROOT%;%MSYS_PATH%;%PATH%
-  - ps: '"using msvc : 14.1 ;`nusing gcc ;`nusing python : 3.10 : c:\\Python310-x64 : c:\\Python310-x64\\include : c:\\Python310-x64\\libs ;`n" | Set-Content $env:HOMEDRIVE\$env:HOMEPATH\user-config.jam'
+  - ps: '"using msvc : 14.3 ;`nusing gcc ;`nusing python : 3.10 : c:\\Python310-x64 : c:\\Python310-x64\\include : c:\\Python310-x64\\libs ;`n" | Set-Content $env:HOMEDRIVE\$env:HOMEPATH\user-config.jam'
   - type %HOMEDRIVE%%HOMEPATH%\user-config.jam
   - g++ --version
   - python --version
