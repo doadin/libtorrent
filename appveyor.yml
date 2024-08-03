@@ -8,12 +8,14 @@ image: Visual Studio 2017
 clone_depth: 1
 environment:
   matrix:
-    - variant: test_release
+    - variant: release
       compiler: msvc-14.1
       model: 64
       python: 1
       python_dist: 1
       crypto: openssl
+      ssl_lib: C:\OpenSSL-v111-Win64\lib
+      ssl_include: C:\OpenSSL-v111-Win64\include
       bjam: 1
 
 artifacts:
@@ -25,13 +27,13 @@ install:
   - git submodule update --init --recursive
   - set ROOT_DIRECTORY=%CD%
   - cd %ROOT_DIRECTORY%
-  - set PYTHON_ROOT=C:\Python37-x64
-  - set PYTHON_INTERPRETER=C:\Python37-x64\python.exe
+  - set PYTHON_ROOT=C:\Python310-x64
+  - set PYTHON_INTERPRETER=C:\Python310-x64\python.exe
   - set MSYS_PATH=c:\msys64\mingw32\bin
-  - set BOOST_ROOT=C:\Libraries\boost_1_69_0
+  - set BOOST_ROOT=C:\Libraries\boost_1_85_0
   - set BOOST_BUILD_PATH=%BOOST_ROOT%\tools\build
   - set PATH=%BOOST_ROOT%;%BOOST_BUILD_PATH%;%PYTHON_ROOT%;%MSYS_PATH%;%PATH%
-  - ps: '"using msvc : 14.1 ;`nusing gcc ;`nusing python : 3.7 : c:\\Python37-x64 : c:\\Python37-x64\\include : c:\\Python37-x64\\libs ;`n" | Set-Content $env:HOMEDRIVE\$env:HOMEPATH\user-config.jam'
+  - ps: '"using msvc : 14.1 ;`nusing gcc ;`nusing python : 3.10 : c:\\Python310-x64 : c:\\Python310-x64\\include : c:\\Python310-x64\\libs ;`n" | Set-Content $env:HOMEDRIVE\$env:HOMEPATH\user-config.jam'
   - type %HOMEDRIVE%%HOMEPATH%\user-config.jam
   - g++ --version
   - python --version
@@ -45,7 +47,7 @@ build_script:
   # boost.python itself doesn't build warning free, so we can't build
   # with warnings-as-errors
   - if defined python (
-    b2.exe --hash openssl-version=pre1.1 warnings=all -j %NUMBER_OF_PROCESSORS% %compiler% address-model=%model% variant=%variant% runtime-link=static link=static libtorrent-link=static boost-link=static crypto=%crypto% asserts=on export-extra=on dht=on stage_module stage_dependencies
+    b2.exe --hash openssl-lib=%ssl_lib% openssl-include=%ssl_include% warnings=all -j %NUMBER_OF_PROCESSORS% %compiler% address-model=%model% variant=%variant% runtime-link=static link=static libtorrent-link=static boost-link=static crypto=%crypto% asserts=on export-extra=on dht=on stage_module stage_dependencies
     )
   - if defined python_dist (
     c:\Python37-x64\python.exe setup.py bdist --format=msi
